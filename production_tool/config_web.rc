@@ -1,5 +1,0 @@
-service config_web /usr/bin/python /data/local/config_web.py
-    class late_start
-    user root
-    group root
-    seclabel u:r:shell:s0
