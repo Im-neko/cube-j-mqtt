@@ -1,0 +1,11 @@
+{
+    "br_id": "<B_ROUTE_ID>",
+    "br_pwd": "<B_ROUTE_PASSWORD>",
+    "mqtt_host": "192.0.2.10",
+    "mqtt_port": 1883,
+    "mqtt_user": "<MQTT_USER>",
+    "mqtt_pass": "<MQTT_PASSWORD>",
+    "device_id": "cubej1",
+    "serial_port": "/dev/ttyS1",
+    "poll_interval": 60
+}

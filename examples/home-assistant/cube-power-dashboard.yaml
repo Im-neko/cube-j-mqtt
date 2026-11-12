@@ -1,0 +1,142 @@
+# Home Assistant ダッシュボード「電力(Cube)」
+# 新しいダッシュボードの「RAW 設定エディタ」に、このファイルをまるごと貼る(手順は docs/home-assistant.md)。
+#
+# ── エンティティ ID の対応表(貼る前に確認して、違えば置き換える) ──────────
+# 下の ID は、デバイス名「Cube J1 Smart Meter」とセンサー名から付く推定。
+# 「開発者ツール → 状態」で cube を検索し、実際の ID が違えば、
+# このファイルの中を左の ID で検索して全部置き換える。
+#
+#   推定の ID                                          中身
+#   sensor.cube_j1_smart_meter_instantaneous_power   瞬時電力(W)
+#   sensor.cube_j1_smart_meter_cumulative_energy_fwd 買電の積算(kWh)
+#   sensor.cube_j1_smart_meter_cumulative_energy_rev 売電の積算(kWh)
+#   sensor.cube_j1_smart_meter_current_r_phase       R 相の電流(A)
+#   sensor.cube_j1_smart_meter_current_t_phase       T 相の電流(A)
+# ────────────────────────────────────────────────────────────
+#
+# 使用量(24 時間・週間・月間)は、買電の積算の長期統計の「変化量」(change)で出す。
+# HA の設定ファイルの編集と再起動は要らない。
+# 週の始まりは、HA の「設定 → システム → 一般」の言語・地域の設定に従う。
+# 統計は Cube をつないだ日からしか無いので、週間・月間のグラフは最初は短い。
+title: 電力(Cube)
+views:
+  - title: 電力
+    path: power
+    icon: mdi:flash
+    cards:
+      # ── いま ──
+      - type: gauge
+        entity: sensor.cube_j1_smart_meter_instantaneous_power
+        name: 瞬時電力
+        unit: W
+        min: 0
+        max: 6000
+        needle: true
+        severity:
+          green: 0
+          yellow: 2000
+          red: 4000
+      - type: history-graph
+        title: 瞬時電力(24 時間)
+        hours_to_show: 24
+        entities:
+          - entity: sensor.cube_j1_smart_meter_instantaneous_power
+            name: 瞬時電力
+
+      # ── 使用量(買電)の合計 ──
+      - type: grid
+        columns: 3
+        square: false
+        cards:
+          - type: statistic
+            name: 今日の使用量
+            entity: sensor.cube_j1_smart_meter_cumulative_energy_fwd
+            stat_type: change
+            period:
+              calendar:
+                period: day
+          - type: statistic
+            name: 今週の使用量
+            entity: sensor.cube_j1_smart_meter_cumulative_energy_fwd
+            stat_type: change
+            period:
+              calendar:
+                period: week
+          - type: statistic
+            name: 今月の使用量
+            entity: sensor.cube_j1_smart_meter_cumulative_energy_fwd
+            stat_type: change
+            period:
+              calendar:
+                period: month
+
+      # ── 使用量の推移 ──
+      - type: statistics-graph
+        title: 24 時間の使用量(1 時間ごと)
+        entities:
+          - entity: sensor.cube_j1_smart_meter_cumulative_energy_fwd
+            name: 買電
+        stat_types:
+          - change
+        period: hour
+        chart_type: bar
+        days_to_show: 1
+      - type: statistics-graph
+        title: 週間の使用量(1 日ごと)
+        entities:
+          - entity: sensor.cube_j1_smart_meter_cumulative_energy_fwd
+            name: 買電
+        stat_types:
+          - change
+        period: day
+        chart_type: bar
+        days_to_show: 7
+      - type: statistics-graph
+        title: 月間の使用量(1 日ごと)
+        entities:
+          - entity: sensor.cube_j1_smart_meter_cumulative_energy_fwd
+            name: 買電
+        stat_types:
+          - change
+        period: day
+        chart_type: bar
+        days_to_show: 30
+
+      # ── 売電 ──
+      - type: grid
+        columns: 2
+        square: false
+        cards:
+          - type: statistic
+            name: 今日の売電
+            entity: sensor.cube_j1_smart_meter_cumulative_energy_rev
+            stat_type: change
+            period:
+              calendar:
+                period: day
+          - type: statistic
+            name: 今月の売電
+            entity: sensor.cube_j1_smart_meter_cumulative_energy_rev
+            stat_type: change
+            period:
+              calendar:
+                period: month
+
+      # ── メーターの積算値 ──
+      - type: entities
+        title: 積算(メーターの値)
+        entities:
+          - entity: sensor.cube_j1_smart_meter_cumulative_energy_fwd
+            name: 買電の積算
+          - entity: sensor.cube_j1_smart_meter_cumulative_energy_rev
+            name: 売電の積算
+
+      # ── 電流 ──
+      - type: history-graph
+        title: 電流 R/T(24 時間)
+        hours_to_show: 24
+        entities:
+          - entity: sensor.cube_j1_smart_meter_current_r_phase
+            name: R 相
+          - entity: sensor.cube_j1_smart_meter_current_t_phase
+            name: T 相

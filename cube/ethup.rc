@@ -1,0 +1,6 @@
+service ethup /system/bin/ethup.sh
+    class late_start
+    user root
+    group root
+    oneshot
+    seclabel u:r:shell:s0
