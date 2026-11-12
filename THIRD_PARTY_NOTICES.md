@@ -1,12 +1,12 @@
 # サードパーティの表示
 
-このリポジトリは kotarou2211/cube-j1-mqtt-webui のフォークです(元は tsuyopon123/cube-j1-mqtt)。上流の履歴を含み、Cube J 向けの手順・スクリプト・記録を足しています。このリポジトリ自身のライセンスは [LICENSE](LICENSE)(MIT License。上流の著作権表示を残し、追加分の表示を足した)です。このファイルには、このリポジトリが取得して使う・形を写した他者のファイルの出典と、その著作権表示・許諾の文を、MIT License の条件(著作権表示と許諾の文を含めること)に従って載せます。
+このリポジトリは kotarou2211/cube-j1-mqtt-webui のフォークです(元は tsuyopon123/cube-j1-mqtt)。上流の履歴を含み、Cube J 向けの手順・スクリプト・記録を足しています。このリポジトリ自身のライセンスは [LICENSE](LICENSE)(MIT License。上流の著作権表示を残し、追加分の表示を足した)です。このファイルには、このリポジトリに含む・形を写した他者のファイルの出典と、その著作権表示・許諾の文を、MIT License の条件(著作権表示と許諾の文を含めること)に従って載せます。
 
-## 取得して使うもの
+## このリポジトリに含むもの(上流のまま、変更なし)
 
 | ファイル | 取得元 | 扱い |
 |---|---|---|
-| `mqtt_bridge.py`(ブリッジ本体) | kotarou2211/cube-j1-mqtt-webui の `production_tool/mqtt_bridge.py`(コミット `ceee77c6b53fda0a44197fda72a855c07c9a61da`) | このリポジトリには含めない。`scripts/fetch-bridge.sh` が固定のコミットから取得し、sha256 を確かめる。変更せずに使う。取得したファイルは取得元の MIT License(下の表示と同じ)に従う |
+| `production_tool/mqtt_bridge.py`(ブリッジ本体) | kotarou2211/cube-j1-mqtt-webui の `production_tool/mqtt_bridge.py`(コミット `ceee77c6b53fda0a44197fda72a855c07c9a61da`) | 上流のコミット `ceee77c` の同じパス・同じ内容(sha256 `8492c230dafe276beb80922975a2d7a24bfa767b2311eac8c7bb0b0d4aa24f09`)のまま、変更していない。取得元の MIT License(下の表示と同じ)に従う |
 
 ## 形を写したファイル
 

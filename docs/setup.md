@@ -44,7 +44,6 @@ git clone https://github.com/Im-neko/cube-j-mqtt.git
 cd cube-j-mqtt
 cp config/config.example.json config/config.json   # config/config.json は .gitignore 済み
 $EDITOR config/config.json
-./scripts/fetch-bridge.sh                           # build/mqtt_bridge.py を取得(sha256 を確認)
 ```
 
 `config/config.json` に書くもの(値は自分で書く。他人に渡さない):
@@ -77,7 +76,7 @@ kotarou2211/cube-j1-mqtt-webui(J1 向け)の USB スクリプトを実行した 
 ### 必要なもの
 
 - 「[機材とアカウント](#機材とアカウント)」のすべて(USB メモリはランナーの実行に使う)
-- 「[設定ファイルを用意する](#設定ファイルを用意する)」で作った `config/config.json` と `build/mqtt_bridge.py`
+- 「[設定ファイルを用意する](#設定ファイルを用意する)」で作った `config/config.json` と `production_tool/mqtt_bridge.py`
 
 ### 手順
 
@@ -120,8 +119,8 @@ CUBE="-s 192.0.2.3:5555"
 adb $CUBE shell 'mount -o rw,remount /; mkdir -p /system/etc/cubej /data/local/cubej-backup'
 # 置き換える rc を退避(J1 向けの USB スクリプトを実行していた場合にある)
 adb $CUBE shell '[ -f /system/etc/init/mqtt_ha_bridge.rc ] && cp -p /system/etc/init/mqtt_ha_bridge.rc /data/local/cubej-backup/'
-adb $CUBE push build/mqtt_bridge.py   /system/etc/cubej/mqtt_bridge.py
-adb $CUBE push build/mqtt_bridge.py   /data/local/mqtt_bridge.py
+adb $CUBE push production_tool/mqtt_bridge.py   /system/etc/cubej/mqtt_bridge.py
+adb $CUBE push production_tool/mqtt_bridge.py   /data/local/mqtt_bridge.py
 adb $CUBE push cube/cubej_bridge.sh   /system/bin/cubej_bridge.sh
 adb $CUBE push cube/mqtt_ha_bridge.rc /system/etc/init/mqtt_ha_bridge.rc
 adb $CUBE push config/config.json     /data/local/config.json
@@ -159,12 +158,11 @@ adb -s 192.0.2.3:5555 shell 'getprop init.svc.mqtt_ha_bridge; getprop init.svc.n
 ### 必要なもの
 
 - 「[機材とアカウント](#機材とアカウント)」のすべて
-- 「[設定ファイルを用意する](#設定ファイルを用意する)」で作った `config/config.json` と `build/mqtt_bridge.py`(どちらも USB メモリに入る)
+- 「[設定ファイルを用意する](#設定ファイルを用意する)」で作った `config/config.json` と `production_tool/mqtt_bridge.py`(`config/config.json` と同じく、どちらも USB メモリに入る)
 
 ### 手順
 
 ```sh
-./scripts/fetch-bridge.sh
 ./scripts/make-usb.sh setup /media/usb    # config/config.json も USB メモリに入る
 sync
 ```

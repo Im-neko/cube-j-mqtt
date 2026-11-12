@@ -4,7 +4,7 @@ NextDrive **Cube J**(無印)で、スマートメーターの計測値(B ルー�
 
 - このリポジトリは [kotarou2211/cube-j1-mqtt-webui](https://github.com/kotarou2211/cube-j1-mqtt-webui) のフォークです(元は [tsuyopon123/cube-j1-mqtt](https://github.com/tsuyopon123/cube-j1-mqtt))。Cube J 向けに、B ルートを取って MQTT に出す手順とスクリプトを足したものです。
 - このリポジトリが対象にするのは Cube J(無印)だけです(Cube J1 では確かめていません)。ネットワークは **USB 有線 LAN** を使います。
-- ブリッジ本体(`mqtt_bridge.py`)は、[kotarou2211/cube-j1-mqtt-webui](https://github.com/kotarou2211/cube-j1-mqtt-webui) の固定のコミットから `scripts/fetch-bridge.sh` で取得して使います(このリポジトリには含めません)。他者の著作物の出典とライセンスは [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) にまとめています。
+- ブリッジ本体(`production_tool/mqtt_bridge.py`)は、[kotarou2211/cube-j1-mqtt-webui](https://github.com/kotarou2211/cube-j1-mqtt-webui) のものを、変更せずにこのリポジトリに含めています。他者の著作物の出典とライセンスは [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) にまとめています。
 
 > [!WARNING]
 > Cube の `/system` を書き換えます。機器の動作不良や、ネットワーク上の危険(adb の TCP 5555 は認証なしで root のシェルになる)が生じる可能性があります。家庭内の LAN だけで、内容を理解したうえで、自分の責任で使ってください。このリポジトリの利用で生じた損害について、作成者は責任を負いません。
@@ -45,11 +45,10 @@ NextDrive **Cube J**(無印)で、スマートメーターの計測値(B ルー�
 ### 方法 A: 実機で動いた順番(動作確認済み)
 
 1. `config/config.example.json` を `config/config.json` にコピーして、B ルートの ID・パスワードと MQTT の接続先を書く(`config/config.json` は git に入らない)
-2. `./scripts/fetch-bridge.sh` で、ブリッジ本体(`mqtt_bridge.py`)を動作確認済みの版から取得する
-3. `./scripts/make-usb.sh run <USB メモリ> usb/cmd/install-ethup.sh` で USB メモリを作り、Cube に挿して電源を入れる(有線 LAN の起動の仕組みが `/system` に入る)
-4. USB メモリを抜き、有線 LAN アダプターを直挿しして電源を入れ直す。ルーターで Cube の IP を調べ、`adb connect <IP>:5555`
-5. adb でブリッジ一式(`cube/cubej_bridge.sh`・`cube/mqtt_ha_bridge.rc`・`mqtt_bridge.py`・`config.json`)を置いて再起動する
-6. Home Assistant に「Cube J1 Smart Meter」のセンサーが自動で出る(デバイス名はブリッジの中で固定。[docs/home-assistant.md](docs/home-assistant.md))
+2. `./scripts/make-usb.sh run <USB メモリ> usb/cmd/install-ethup.sh` で USB メモリを作り、Cube に挿して電源を入れる(有線 LAN の起動の仕組みが `/system` に入る)
+3. USB メモリを抜き、有線 LAN アダプターを直挿しして電源を入れ直す。ルーターで Cube の IP を調べ、`adb connect <IP>:5555`
+4. adb でブリッジ一式(`cube/cubej_bridge.sh`・`cube/mqtt_ha_bridge.rc`・`production_tool/mqtt_bridge.py`・`config.json`)を置いて再起動する
+5. Home Assistant に「Cube J1 Smart Meter」のセンサーが自動で出る(デバイス名はブリッジの中で固定。[docs/home-assistant.md](docs/home-assistant.md))
 
 ### 方法 B: USB メモリ 1 回のセットアップ(未検証)
 
@@ -73,13 +72,13 @@ cube/                   Cube の /system に置くファイル
   ethup.sh, ethup.rc      USB 有線 LAN を DHCP で上げ、adb を TCP 5555 で待ち受けさせる
   cubej_bridge.sh         IP を待ち、ndechonetd を止めて、ブリッジを起動する
   mqtt_ha_bridge.rc       ブリッジの rc(cubej_bridge.sh を起動する)
+production_tool/       ブリッジ本体(mqtt_bridge.py。上流のまま、変更なし)
 usb/                    USB メモリから Cube に実行させるスクリプト
   runner                  汎用のランナー(cmd.sh を root で実行し、結果を USB メモリに書く)
   cmd/install-ethup.sh    ランナーで ethup を置く(方法 A)
   cmd/check-ethup.sh      ランナーで有線 LAN の起動の結果を見る(読み取りのみ)
   setup                   1 回のセットアップ(方法 B、未検証)
 scripts/
-  fetch-bridge.sh         ブリッジ本体を取得して sha256 を確かめる
   make-usb.sh             USB メモリの中身を作る
 examples/home-assistant/ ダッシュボードの例
 ```
@@ -87,5 +86,5 @@ examples/home-assistant/ ダッシュボードの例
 ## ライセンスと出典
 
 - このリポジトリは、全体が [LICENSE](LICENSE)(MIT License)に従います。
-- 他者の著作物(取得して使うブリッジ本体、形を写した `cube/mqtt_ha_bridge.rc` など)の出典・著作権表示・ライセンス文は [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) に置いています。
+- 他者の著作物(含めているブリッジ本体、形を写した `cube/mqtt_ha_bridge.rc` など)の出典・著作権表示・ライセンス文は [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) に置いています。
 - NextDrive・Cube J・Cube J1 は、各社の製品名です。このリポジトリは、NextDrive とは関係ありません。

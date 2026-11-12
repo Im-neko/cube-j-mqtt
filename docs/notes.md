@@ -27,7 +27,7 @@
 
 - **Wi-SUN(`/dev/ttyS1`)**: 標準のサービス `ndechonetd`(`/usr/sbin/ndechonetd /dev/ttyS1 1`)が握っているので、ブリッジの前に `stop ndechonetd` が要る。止めても `gndctrl` は ndechonetd を再起動しなかった(15 秒観察)が、再起動すると元に戻るので、起動のたびにラッパー(`cube/cubej_bridge.sh`)が止める。J1 向けのスクリプトが無効化する `wisund`・`NDEcLiteAgent` のバイナリは、J の system_b には無い(スタブの rc を作っても何も止まらない)。
   - 推測(未確認): ndechonetd の rc を `disabled` にすれば、ラッパーで止めなくても済む。元の rc の退避が要るので試していない。
-- **ブリッジ本体**: J でも、取得したブリッジ(`mqtt_bridge.py`)を変更せずに使えた。`/dev/ttyS1` の SKSTACK コマンドで、PAN のスキャン → PANA 認証 → 計測値の取得まで動いた。`config.json` の形・トピック・Home Assistant の自動登録は [setup.md](setup.md)・[home-assistant.md](home-assistant.md) のとおり。
+- **ブリッジ本体**: J でも、ブリッジ(`mqtt_bridge.py`)を変更せずに使えた。`/dev/ttyS1` の SKSTACK コマンドで、PAN のスキャン → PANA 認証 → 計測値の取得まで動いた。`config.json` の形・トピック・Home Assistant の自動登録は [setup.md](setup.md)・[home-assistant.md](home-assistant.md) のとおり。
 - **ネットワークと adb の起動**: `persist.adb.tcp.port` は、電源を入れ直すと -1 に戻っていた。persist の設定に頼らず、`ethup.sh` が起動のたびに adb の TCP 5555 を設定する。標準のファームウェアは有線 LAN を自動で上げない。
 - **ブリッジの起動の順番**: 内蔵 Wi-Fi が使えず、ネットワークが付く前にブリッジを起動しても MQTT につながらない。ラッパーが IP を待つ。
 - **ブリッジ本体の控え**: `/data/local/` の自前のファイル(config.json・mqtt_bridge.py)が、ある電源の入れ直しのあとで消えていた(その後は消えなかった。原因は分かっていない)。ブリッジ本体は `/system/etc/cubej/` に控えを置き、無ければラッパーがコピーする。config.json は認証情報なので `/data/local` にだけ置く。
