@@ -19,7 +19,6 @@ NextDrive **Cube J**(無印)で、スマートメーターの計測値(B ルー�
 | USB 有線 LAN(RTL8153、ハブ無し)+ ブリッジ | **動作を確認**。B ルートの計測値(瞬時電力・積算電力量・電流)を MQTT で送信し、再起動後も自動で起動する([docs/setup.md](docs/setup.md) の方法 A)。確認した Cube には先に kotarou2211/cube-j1-mqtt-webui の USB スクリプト(J1 向け)を実行してあり、実行していない Cube では未確認 |
 | USB メモリ 1 回のセットアップ(`usb/setup`) | **未検証**。方法 A と同じファイルを置くが、スクリプトを通しで実行したことはない(方法 B) |
 | 内蔵 Wi-Fi | この個体では、チップの初期化に失敗して使えない([付録 A](docs/appendix/wifi-chip-failure.md)) |
-| 元に戻す手順([docs/notes.md](docs/notes.md)) | **未実行**(手順として書いただけ) |
 
 ## Cube J で必要になること
 
