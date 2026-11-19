@@ -1,0 +1,2 @@
+# Cube の sh・init は CRLF を読めないので、どの OS で取得しても LF のままにする
+* text=auto eol=lf

@@ -1,0 +1,14 @@
+# 認証情報(B ルートの ID・パスワード、MQTT)。雛形 production_tool/config.example.json をコピーして作る
+production_tool/config.json
+*.secret
+.env
+
+# USB メモリに書き戻される結果
+setup-cubej.txt
+
+# 個人の環境・ツールのファイル
+.claude/
+.serena/
+data/
+.DS_Store
+*.log
