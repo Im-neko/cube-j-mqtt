@@ -95,6 +95,7 @@ adb -s <Cube の IP>:5555 shell 'getprop init.svc.mqtt_ha_bridge; getprop init.s
 | 有線 LAN(RTL8153、ハブ無し)+ ブリッジで、計測値を MQTT で送る | **確認済み**(2026-11-11)。瞬時電力・積算電力量・電流を送信し、再起動後も自動で起動した。このときは、同じ内容の `ethup.sh`・`ethup.rc`・`mqtt_ha_bridge.rc`・ブリッジ本体と、コメント 1 行だけが違う `cubej_bridge.sh` を、USB メモリの別のスクリプトと adb で置いた |
 | USB メモリのスクリプト(`production_tool/production_tool`)の通しの実行 | **確認済み**(2026-11-19)。このリポジトリの中身をコピーした FAT32 を Cube の `/mnt/usb` にマウントし、Cube が USB メモリを見つけたときに実行するのと同じ `/usr/sbin/launch_pt_init.sh` を実行した。全ファイルが置かれ(md5 一致)、`/` は読み取り専用に戻り、`setup-cubej.txt` が USB メモリに書かれ、LED が白で点滅した。2 回目の実行では退避を上書きしなかった |
 | セットアップ後の再起動で、ブリッジが自動で起動して計測値が出る | **確認済み**(2026-11-19)。再起動から約 4 分(有線 LAN を待つ 240 秒を含む)でブリッジが起動し、MQTT のブローカーに瞬時電力が 1 分ごとに届いた。ただし、このときの Cube は有線 LAN の代わりに USB Wi-Fi でつながっていたので、`ethup.sh` だけは USB Wi-Fi 用に手を入れた版で再起動した(有線 LAN を上げる部分は上の 2026-11-11 の確認による) |
+| Home Assistant にデバイス・センサーが自動で出る | 作業者は Home Assistant の画面では確かめていない。この Cube のセンサーを Home Assistant で使っている実績と、ブリッジが自動検出の設定(`homeassistant/sensor/...`)を送ることによる |
 | USB メモリを挿して電源を入れたときの自動の実行 | **未確認**。試験した Cube の USB ポートは別の機器で使っていたため、本物の USB メモリは挿していない。Cube のプログラム(`gndctrl`)が `/dev/block/sda1` を vfat で `/mnt/usb` にマウントし、`CubeJMTS.txt` があれば `launch_pt_init.sh` を実行することは、プログラムの中の文字列から読み取った。上流の J1 向けの USB スクリプトと、同じ仕組みの診断用の USB メモリは、この Cube で実際に動いた |
 
 未確認の点の確かめ方: 「[使い方](#使い方)」の 1〜3 を行い、LED が白で 10 回点滅し、USB メモリに `setup-cubej.txt` ができて `== setup end` の行があれば確認できたことになります。
