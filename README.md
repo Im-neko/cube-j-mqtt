@@ -27,7 +27,7 @@ NextDrive **Cube J**(無印)で、スマートメーターの計測値(B ルー�
 
 ## 設定
 
-`production_tool/config.json`(`config.example.json` をコピーして作る。git には入らない):
+`production_tool/config.json`(`config.example.json` をコピーして作る。git には入らない。UTF-8 の BOM 無しで保存する):
 
 | キー | 中身 |
 |---|---|
@@ -44,8 +44,9 @@ NextDrive **Cube J**(無印)で、スマートメーターの計測値(B ルー�
 Cube は、USB メモリの直下に `CubeJMTS.txt` があると、`production_tool/` を `/tmp/production_tool/` にコピーし、`production_tool/production_tool` を root で実行します(Cube の `/usr/sbin/launch_pt_init.sh`)。このスクリプトは次を行います。
 
 - `/system` に置く: `ethup.sh`・`ethup.rc`(起動のたびに USB 有線 LAN を DHCP で上げ、adb を TCP 5555 で待ち受けさせる)、`cubej_bridge.sh`・`mqtt_ha_bridge.rc`(有線 LAN の IP を最大 240 秒待ち、Wi-SUN の `/dev/ttyS1` を握る標準のサービス `ndechonetd` を止めてから、ブリッジを起動する)、ブリッジ本体の控え `/system/etc/cubej/mqtt_bridge.py`
-- `/data/local/` に置く: `mqtt_bridge.py`、`config.json`(権限 600)
-- 置き換える既存のファイルは、初回だけ `/data/local/cubej-backup/` に退避する。Wi-Fi の設定には触れない
+- `/data/local/` に置く: `mqtt_bridge.py`、`config.json`(権限 600。どちらも既存のものは退避せずに上書きする)
+- `/system` の置き換える既存のファイルは、初回だけ `/data/local/cubej-backup/` に退避する。Wi-Fi の設定ファイルには触れない
+- `ethup.sh` は、起動時に `lo`・`sit0`・`wlan0`・`p2p*` 以外で最初に見つかったネットワークデバイスを有線 LAN とみなして DHCP をかける。USB Wi-Fi のドングル(`ra0` など)を挿して使っている Cube では、そのドングルに DHCP をかけてしまうので、この構成は向かない
 
 USB メモリに `update.img` を置かないでください(Cube はファームウェアの更新として扱います)。
 
@@ -76,7 +77,7 @@ adb -s <Cube の IP>:5555 shell 'getprop init.svc.mqtt_ha_bridge; getprop init.s
 | 症状 | 原因・対処 |
 |---|---|
 | LED が黄のまま | スクリプトが途中で止まった。USB メモリに `setup-cubej.txt` があれば、それを見る |
-| `setup-cubej.txt` に「config.json が無い」「雛形の値が残っている」 | 「設定」をやり直して、もう一度 USB メモリを挿して電源を入れる |
+| `setup-cubej.txt` に「config.json が無い」「雛形の値(`<...>` か 192.0.2.x)が残っている」 | 「設定」をやり直して、もう一度 USB メモリを挿して電源を入れる |
 | 有線 LAN の IP が付かない・adb が届かない | アダプターをハブ経由で挿していないか。`ethup.rc` は起動時に読まれるので、セットアップの後に電源の入れ直しが要る |
 | ログに `MQTT: connection refused code 5` | MQTT のユーザー名かパスワードがブローカーに拒否された。ブローカーのユーザーと `config.json` を直す(`adb push` で `/data/local/config.json` に送り直すか、USB メモリのセットアップをやり直す) |
 | ログに `MQTT ping: no response` のあと再接続 | 既知の挙動。再接続して回復する |
@@ -91,7 +92,7 @@ adb -s <Cube の IP>:5555 shell 'getprop init.svc.mqtt_ha_bridge; getprop init.s
 
 | 確かめたこと | 状況 |
 |---|---|
-| 有線 LAN(RTL8153、ハブ無し)+ ブリッジで、計測値を MQTT で送る | **確認済み**(2026-11-11)。瞬時電力・積算電力量・電流を送信し、再起動後も自動で起動した。このときは、同じ内容の `ethup.sh`・`ethup.rc` とブリッジを、USB メモリの別のスクリプトと adb で置いた |
+| 有線 LAN(RTL8153、ハブ無し)+ ブリッジで、計測値を MQTT で送る | **確認済み**(2026-11-11)。瞬時電力・積算電力量・電流を送信し、再起動後も自動で起動した。このときは、同じ内容の `ethup.sh`・`ethup.rc`・`mqtt_ha_bridge.rc`・ブリッジ本体と、コメント 1 行だけが違う `cubej_bridge.sh` を、USB メモリの別のスクリプトと adb で置いた |
 | USB メモリのスクリプト(`production_tool/production_tool`)の通しの実行 | **確認済み**(2026-11-19)。このリポジトリの中身をコピーした FAT32 を Cube の `/mnt/usb` にマウントし、Cube が USB メモリを見つけたときに実行するのと同じ `/usr/sbin/launch_pt_init.sh` を実行した。全ファイルが置かれ(md5 一致)、`/` は読み取り専用に戻り、`setup-cubej.txt` が USB メモリに書かれ、LED が白で点滅した。2 回目の実行では退避を上書きしなかった |
 | セットアップ後の再起動で、ブリッジが自動で起動して計測値が出る | **確認済み**(2026-11-19)。再起動から約 4 分(有線 LAN を待つ 240 秒を含む)でブリッジが起動し、MQTT のブローカーに瞬時電力が 1 分ごとに届いた。ただし、このときの Cube は有線 LAN の代わりに USB Wi-Fi でつながっていたので、`ethup.sh` だけは USB Wi-Fi 用に手を入れた版で再起動した(有線 LAN を上げる部分は上の 2026-11-11 の確認による) |
 | USB メモリを挿して電源を入れたときの自動の実行 | **未確認**。試験した Cube の USB ポートは別の機器で使っていたため、本物の USB メモリは挿していない。Cube のプログラム(`gndctrl`)が `/dev/block/sda1` を vfat で `/mnt/usb` にマウントし、`CubeJMTS.txt` があれば `launch_pt_init.sh` を実行することは、プログラムの中の文字列から読み取った。上流の J1 向けの USB スクリプトと、同じ仕組みの診断用の USB メモリは、この Cube で実際に動いた |
