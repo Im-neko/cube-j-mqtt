@@ -1,13 +1,10 @@
-# 認証情報(B ルートの ID・パスワード、MQTT)。例は *.example.* を使う
-config/config.json
+# 認証情報(B ルートの ID・パスワード、MQTT)。雛形 production_tool/config.example.json をコピーして作る
+production_tool/config.json
 *.secret
 .env
 
-# 生成物(make-usb.sh の出力、USB メモリに書く中身)
-build/
-
-# 吸い出したイメージ(機器の固有の値と認証情報を含む)
-*.img
+# USB メモリに書き戻される結果
+setup-cubej.txt
 
 # 個人の環境・ツールのファイル
 .claude/

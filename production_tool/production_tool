@@ -1,18 +1,19 @@
 #!/system/bin/sh
-# Cube J のセットアップ(USB メモリから 1 回で行う版)。**未検証**: 個々のファイルは実機で動作を確かめたが、
-# このスクリプトを通しで実行したことはない(docs/setup.md「方法 B」)。
+# Cube J のセットアップ(USB メモリから 1 回で行う)。
 #
-# Cube の gndctrl が USB メモリの CubeJMTS.txt を見つけると、production_tool/ を /tmp/production_tool に
-# コピーし、production_tool/production_tool を root で実行する(/usr/sbin/launch_pt_init.sh)。
-# scripts/make-usb.sh setup が、このファイルを production_tool/production_tool として置く。
+# USB メモリの直下に CubeJMTS.txt と production_tool/ があると、Cube の gndctrl が /usr/sbin/launch_pt_init.sh を
+# 実行する。launch_pt_init.sh は /mnt/usb/production_tool/ を /tmp/production_tool/ にコピーし、実行の権限を付けて、
+# このファイル(production_tool/production_tool)を root で実行する。
 #
-# すること(wisund・NDEcLiteAgent のスタブは作らない。Wi-Fi(wlan0)の設定には触れない):
-#   1. /system に有線 LAN の起動(ethup)・ブリッジの起動(cubej_bridge.sh・mqtt_ha_bridge.rc)・ブリッジの控えを置く
+# すること(Wi-Fi の設定には触れない):
+#   1. /system に有線 LAN の起動(ethup.sh・ethup.rc)・ブリッジの起動(cubej_bridge.sh・mqtt_ha_bridge.rc)・
+#      ブリッジ本体の控え(/system/etc/cubej/mqtt_bridge.py)を置く。
 #      置き換える既存のファイルは、初回だけ /data/local/cubej-backup/ に退避する
 #   2. config.json・mqtt_bridge.py を /data/local/ に置く(config.json は権限 600)
-#   3. ログを USB メモリの setup-cubej.txt に書き、LED を白で 10 回点滅させる
-# 終わったら USB メモリを抜き、有線 LAN アダプター(ハブ無し)を挿して電源を入れ直す。ethup の rc は起動時に読まれる。
+#   3. 結果を USB メモリの setup-cubej.txt(と /data/local/cubej-setup.txt)に書き、LED を白で 10 回点滅させる
+# 終わったら USB メモリを抜き、有線 LAN アダプター(ハブ無し)を挿して電源を入れ直す。rc は起動時に読まれる。
 PT=/tmp/production_tool
+USB=/mnt/usb
 OUT=/data/local/cubej-setup.txt
 BK=/data/local/cubej-backup
 L=/sys/class/leds
@@ -39,20 +40,19 @@ install_file() {  # 元 先 権限
   install_file $PT/mqtt_bridge.py    /system/etc/cubej/mqtt_bridge.py    644
   sync
   mount -o ro,remount /
-  cp $PT/mqtt_bridge.py /data/local/mqtt_bridge.py && chmod 755 /data/local/mqtt_bridge.py
+  cp $PT/mqtt_bridge.py /data/local/mqtt_bridge.py && chmod 755 /data/local/mqtt_bridge.py && echo "installed /data/local/mqtt_bridge.py"
   if [ -f $PT/config.json ]; then
     cp $PT/config.json /data/local/config.json && chmod 600 /data/local/config.json && echo "installed /data/local/config.json"
+    grep -q '"<' /data/local/config.json && echo "注意: config.json に雛形の値(<...>)が残っている。ブリッジは B ルート・MQTT につながらない"
   else
-    echo "config.json が無い(ブリッジは起動しない。あとで adb で /data/local/config.json に置く)"
+    echo "注意: production_tool/config.json が無い(ブリッジは起動しても動かない。config.example.json をコピーして書き、もう一度実行する)"
   fi
   md5sum /system/bin/ethup.sh /system/etc/init/ethup.rc /system/bin/cubej_bridge.sh \
          /system/etc/init/mqtt_ha_bridge.rc /system/etc/cubej/mqtt_bridge.py /data/local/mqtt_bridge.py
   echo "== setup end: $(date)"
 } > $OUT 2>&1
 
-for m in $(grep -E " vfat | exfat | fuse " /proc/mounts | cut -d' ' -f2); do
-  cp $OUT "$m/setup-cubej.txt" 2>/dev/null && sync
-done
+cp $OUT $USB/setup-cubej.txt && sync
 
 # 完了: 白で 10 回点滅
 i=0
